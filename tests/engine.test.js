@@ -4,7 +4,17 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const { COUNTRIES, REGIONS, CONFUSABLE_GROUPS } = require("../js/countries.js");
-const { GameEngine, MODES, DIFFICULTIES, SCORING, computePoints, buildPool } = require("../js/engine.js");
+const {
+  GameEngine,
+  MODES,
+  ROUNDS,
+  DIFFICULTIES,
+  SCORING,
+  computePoints,
+  buildPool,
+  normaliseRounds,
+  roundsLabel
+} = require("../js/engine.js");
 
 /** Small deterministic generator so tests are repeatable. */
 function seededRng(seed) {
@@ -137,6 +147,69 @@ test("wrong answers reset the streak, cost a life and end the game at zero", () 
   assert.equal(engine.finished, true);
   assert.equal(engine.endReason, "lives");
   assert.equal(engine.nextQuestion(), null);
+});
+
+test("classic rounds end with 'complete' after the chosen number of flags", () => {
+  const engine = makeEngine({ rounds: 10 });
+  assert.equal(engine.rounds, 10);
+
+  let result = null;
+  for (let i = 0; i < 10; i++) {
+    const question = engine.nextQuestion();
+    assert.ok(question, `question ${i + 1} should exist`);
+    assert.equal(question.number, i + 1);
+    result = engine.answer(question.country.code, 100);
+    if (i < 9) assert.equal(result.gameOver, false);
+  }
+
+  assert.equal(result.gameOver, true);
+  assert.equal(result.reason, "complete");
+  assert.equal(engine.finished, true);
+  assert.equal(engine.lives, 3);
+  assert.equal(engine.nextQuestion(), null);
+  assert.equal(engine.summary().rounds, 10);
+  assert.equal(engine.summary().reason, "complete");
+});
+
+test("a single wrong answer never ends a classic round", () => {
+  const engine = makeEngine({ rounds: 20 });
+  const question = engine.nextQuestion();
+  const wrong = question.options.find((option) => option.code !== question.country.code);
+  const result = engine.answer(wrong.code, 100);
+  assert.equal(result.gameOver, false);
+  assert.equal(result.lives, 2);
+  assert.ok(engine.nextQuestion());
+});
+
+test("losing all lives beats the round limit", () => {
+  const engine = makeEngine({ rounds: 20 });
+  let result = null;
+  for (let i = 0; i < 3; i++) {
+    const question = engine.nextQuestion();
+    const wrong = question.options.find((option) => option.code !== question.country.code);
+    result = engine.answer(wrong.code, 100);
+  }
+  assert.equal(result.gameOver, true);
+  assert.equal(result.reason, "lives");
+  assert.equal(engine.answered, 3);
+});
+
+test("round counts are normalised and only apply to modes with rounds", () => {
+  assert.equal(normaliseRounds("10"), 10);
+  assert.equal(normaliseRounds(15.7), 15);
+  assert.equal(normaliseRounds(1), ROUNDS.min);
+  assert.equal(normaliseRounds(9999), ROUNDS.max);
+  assert.equal(normaliseRounds("abc"), null);
+  assert.equal(normaliseRounds(null), null);
+
+  assert.equal(roundsLabel(10), "Rapid 10");
+  assert.equal(roundsLabel(20), "Rapid 20");
+  assert.equal(roundsLabel(15), "15 flags");
+
+  assert.equal(makeEngine({ mode: "timed", rounds: 10 }).rounds, null);
+  assert.equal(makeEngine({ mode: "practice", rounds: 10 }).rounds, null);
+  assert.equal(makeEngine().rounds, null);
+  assert.equal(MODES.classic.questionSeconds, 30);
 });
 
 test("timeouts count as wrong answers", () => {

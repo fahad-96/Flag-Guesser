@@ -11,13 +11,15 @@ const MODES = Object.freeze({
   classic: Object.freeze({
     id: "classic",
     label: "Classic",
-    tagline: "Three lives and twelve seconds per flag.",
+    tagline: "Three lives and thirty seconds per flag. Play 10, 20 or a custom number of flags.",
     lives: 3,
-    questionSeconds: 12,
+    questionSeconds: 30,
+    questionClock: true,
     totalSeconds: null,
     fiftyFifty: 3,
     wrongPenaltySeconds: 0,
-    saveScore: true
+    saveScore: true,
+    rounds: true
   }),
   timed: Object.freeze({
     id: "timed",
@@ -42,6 +44,35 @@ const MODES = Object.freeze({
     saveScore: false
   })
 });
+
+/** Preset round lengths for modes that support a fixed number of flags. */
+const ROUNDS = Object.freeze({
+  presets: Object.freeze([
+    Object.freeze({ id: "10", label: "Rapid 10", count: 10 }),
+    Object.freeze({ id: "20", label: "Rapid 20", count: 20 })
+  ]),
+  min: 5,
+  max: 199,
+  defaultCustom: 15
+});
+
+/**
+ * Normalises a requested round count. Returns null for "no limit".
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+function normaliseRounds(value) {
+  const count = Number(value);
+  if (!Number.isFinite(count) || count <= 0) return null;
+  return Math.min(ROUNDS.max, Math.max(ROUNDS.min, Math.floor(count)));
+}
+
+/** Human label for a round length, e.g. "Rapid 10" or "15 flags". */
+function roundsLabel(count) {
+  const preset = ROUNDS.presets.find((item) => item.count === count);
+  if (preset) return preset.label;
+  return `${count} flags`;
+}
 
 const DIFFICULTIES = Object.freeze({
   easy: Object.freeze({ id: "easy", label: "Easy", tiers: [1], multiplier: 1 }),
@@ -145,6 +176,7 @@ class GameEngine {
    * @param {ReadonlyArray<ReadonlyArray<string>>} [options.confusableGroups]
    * @param {() => number} [options.rng]
    * @param {number} [options.optionCount]
+   * @param {number | null} [options.rounds] Number of flags before the round ends. Only used by modes with rounds.
    */
   constructor(options) {
     const opts = options || {};
@@ -156,6 +188,7 @@ class GameEngine {
     this.mode = mode;
     this.difficulty = difficulty;
     this.region = opts.region || "world";
+    this.rounds = mode.rounds ? normaliseRounds(opts.rounds) : null;
     this.rng = typeof opts.rng === "function" ? opts.rng : Math.random;
     this.optionCount = opts.optionCount || 4;
 
@@ -335,8 +368,11 @@ class GameEngine {
       fiftyUsed: question.fiftyUsed
     });
 
-    const gameOver = this.lives !== null && this.lives <= 0;
-    if (gameOver) this.finish("lives");
+    const outOfLives = this.lives !== null && this.lives <= 0;
+    const complete = this.rounds !== null && this.answered >= this.rounds;
+    if (outOfLives) this.finish("lives");
+    else if (complete) this.finish("complete");
+    const gameOver = outOfLives || complete;
 
     return {
       correct,
@@ -346,6 +382,7 @@ class GameEngine {
       streak: this.streak,
       lives: this.lives,
       gameOver,
+      reason: gameOver ? this.endReason : null,
       country: question.country,
       chosen: code === null ? null : this.byCode.get(code) || null
     };
@@ -396,6 +433,7 @@ class GameEngine {
       mode: this.mode.id,
       difficulty: this.difficulty.id,
       region: this.region,
+      rounds: this.rounds,
       score: this.score,
       answered: this.answered,
       correct: this.correct,
@@ -412,5 +450,16 @@ class GameEngine {
 }
 
 if (typeof module === "object" && module.exports) {
-  module.exports = { GameEngine, MODES, DIFFICULTIES, SCORING, computePoints, buildPool, shuffle };
+  module.exports = {
+    GameEngine,
+    MODES,
+    ROUNDS,
+    DIFFICULTIES,
+    SCORING,
+    computePoints,
+    buildPool,
+    shuffle,
+    normaliseRounds,
+    roundsLabel
+  };
 }

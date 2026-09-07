@@ -544,6 +544,49 @@ main {
   color: var(--muted);
 }
 
+/* Round length picker (shown for modes with a fixed number of flags). */
+
+.rounds {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.rounds__row {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .rounds__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rounds__custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  animation: fade-up 0.2s var(--ease);
+}
+
+.rounds__custom-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.input.rounds__custom-input {
+  width: 96px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.segmented.segmented--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .segmented {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -844,8 +887,8 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  margin-top: 28px;
+  gap: 14px;
+  margin-top: 20px;
 }
 
 .quiz__prompt {
@@ -857,10 +900,10 @@ main {
 
 .flag-card {
   position: relative;
-  width: min(100%, 520px);
+  width: min(100%, 460px);
   aspect-ratio: 3 / 2;
   margin: 0;
-  padding: 16px;
+  padding: 14px;
   display: grid;
   place-items: center;
   border-radius: var(--radius);

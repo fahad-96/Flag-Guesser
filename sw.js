@@ -7,7 +7,7 @@
  * but the game still opens offline.
  * Flag images: cache first, so previously seen flags never need the network.
  */
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 const SHELL_CACHE = `flag-guesser-shell-${VERSION}`;
 const FLAG_CACHE = "flag-guesser-flags-v1";
 const FLAG_HOST = "flagcdn.com";

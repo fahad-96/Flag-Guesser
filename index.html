@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Flag Guesser</title>
-  <meta name="description" content="A fast, polished flag quiz. 199 flags, three game modes, streak scoring, lifelines and a local leaderboard.">
+  <meta name="description" content="A fast, polished flag quiz. 199 flags, three game modes, Rapid 10 and Rapid 20 rounds, streak scoring, lifelines and a local leaderboard.">
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0e0f12">
   <meta property="og:title" content="Flag Guesser">
@@ -65,7 +65,7 @@
                 <svg viewBox="0 0 24 24" focusable="false"><path d="M12 21s-7.5-4.6-9.5-9.3C1.2 8.5 3.3 5 6.8 5c2 0 3.5 1.1 4.2 2.3C11.7 6.1 13.2 5 15.2 5c3.5 0 5.6 3.5 4.3 6.7C17.5 16.4 12 21 12 21Z" fill="currentColor"/></svg>
               </span>
               <span class="mode-card__name">Classic</span>
-              <span class="mode-card__desc">Three lives and twelve seconds per flag. Build streaks for big scores.</span>
+              <span class="mode-card__desc">Three lives and thirty seconds per flag. Play 10, 20 or your own number of flags.</span>
             </label>
             <label class="mode-card">
               <input type="radio" name="mode" value="timed">
@@ -83,6 +83,21 @@
               <span class="mode-card__name">Practice</span>
               <span class="mode-card__desc">No lives and no clock. Learn every flag at your own pace.</span>
             </label>
+          </div>
+
+          <div class="rounds" data-rounds-panel>
+            <span class="setup__label" id="rounds-label">Round length</span>
+            <div class="rounds__row">
+              <div class="segmented segmented--3" role="group" aria-labelledby="rounds-label">
+                <label><input type="radio" name="rounds" value="10" checked><span>Rapid 10</span></label>
+                <label><input type="radio" name="rounds" value="20"><span>Rapid 20</span></label>
+                <label><input type="radio" name="rounds" value="custom"><span>Custom</span></label>
+              </div>
+              <label class="rounds__custom" data-custom-rounds hidden>
+                <span class="rounds__custom-label">Flags</span>
+                <input class="input rounds__custom-input" type="number" id="custom-rounds" name="customRounds" min="5" max="199" step="1" value="15" inputmode="numeric">
+              </label>
+            </div>
           </div>
         </fieldset>
 
@@ -261,7 +276,7 @@
   </main>
 
   <footer class="footer container">
-    <p>Built by Fahad Yousuf. Flag images by <a href="https://flagpedia.net" target="_blank" rel="noopener">Flagpedia</a>.</p>
+    <p>Built by <a href="https://fahad-yousuf.netlify.app/" target="_blank" rel="noopener">Fahad Yousuf</a>. Flag images by <a href="https://flagpedia.net" target="_blank" rel="noopener">Flagpedia</a>.</p>
   </footer>
 
   <!-- Pause -->
@@ -321,7 +336,7 @@
 
       <h3>Modes</h3>
       <ul>
-        <li><strong>Classic.</strong> Three lives and twelve seconds per flag. Run out of either and the round ends.</li>
+        <li><strong>Classic.</strong> Three lives and a thirty second countdown per flag. Pick Rapid 10, Rapid 20 or a custom number of flags. The round ends when the flags run out or you lose all three lives.</li>
         <li><strong>Time Attack.</strong> Sixty seconds total. Wrong answers cost three seconds.</li>
         <li><strong>Practice.</strong> No pressure. Scores are not ranked.</li>
       </ul>

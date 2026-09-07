@@ -19,7 +19,9 @@ const Storage = (() => {
     theme: "system",
     lastMode: "classic",
     lastDifficulty: "medium",
-    lastRegion: "world"
+    lastRegion: "world",
+    lastRounds: "10",
+    lastCustomRounds: 15
   });
 
   const DEFAULT_STATS = Object.freeze({
@@ -122,6 +124,7 @@ const Storage = (() => {
       mode: entry.mode,
       difficulty: entry.difficulty,
       region: entry.region,
+      rounds: Number.isFinite(entry.rounds) ? entry.rounds : null,
       accuracy: entry.accuracy || 0,
       bestStreak: entry.bestStreak || 0,
       answered: entry.answered || 0,

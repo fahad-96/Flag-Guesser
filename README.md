@@ -5,7 +5,7 @@ A fast, polished flag quiz that runs entirely in the browser. No build step, no 
 ## Features
 
 - 199 countries with capitals, regions and difficulty tiers bundled locally
-- Three modes: Classic (three lives, twelve seconds per flag), Time Attack (sixty seconds, mistakes cost time) and Practice (no pressure)
+- Three modes: Classic (three lives, thirty second countdown per flag, play Rapid 10, Rapid 20 or a custom number of flags), Time Attack (sixty seconds, mistakes cost time) and Practice (no pressure)
 - Four difficulty levels and region filters (world, Africa, Americas, Asia, Europe, Oceania)
 - Smart distractors: look-alike flags such as Chad and Romania are deliberately offered together
 - Streak multiplier, speed bonus and difficulty multiplier

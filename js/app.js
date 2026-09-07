@@ -8,7 +8,7 @@
 (() => {
   const FLAG_BASE = "https://flagcdn.com";
   const ADVANCE_AFTER_CORRECT_MS = 900;
-  const ADVANCE_AFTER_WRONG_TIMED_MS = 1500;
+  const ADVANCE_AFTER_WRONG_MS = 1600;
   const GAME_OVER_DELAY_MS = 1200;
   const TOAST_MS = 2600;
 
@@ -16,7 +16,7 @@
     lives: "Out of lives",
     time: "Time is up",
     quit: "Round ended",
-    complete: "Set complete"
+    complete: "Round complete"
   };
 
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -26,6 +26,9 @@
     screens: $$(".screen"),
     setupForm: $("#setup-form"),
     regionSelect: $("#region-select"),
+    roundsPanel: $("[data-rounds-panel]"),
+    customRoundsWrap: $("[data-custom-rounds]"),
+    customRoundsInput: $("#custom-rounds"),
     poolHint: $("#pool-hint"),
     startButton: $("#start-button"),
     homeStats: {
@@ -146,10 +149,14 @@
     return region ? region.label : regionId;
   }
 
-  function setupLabel(modeId, difficultyId, regionId) {
+  function modeLabel(modeId, rounds) {
     const mode = MODES[modeId] ? MODES[modeId].label : modeId;
+    return Number.isFinite(rounds) && rounds ? `${mode} · ${roundsLabel(rounds)}` : mode;
+  }
+
+  function setupLabel(modeId, difficultyId, regionId, rounds) {
     const difficulty = DIFFICULTIES[difficultyId] ? DIFFICULTIES[difficultyId].label : difficultyId;
-    return `${mode} · ${difficulty} · ${regionLabel(regionId)}`;
+    return `${modeLabel(modeId, rounds)} · ${difficulty} · ${regionLabel(regionId)}`;
   }
 
   function bump(element) {
@@ -238,30 +245,59 @@
 
   function readSetup() {
     const form = dom.setupForm;
+    const mode = form.elements.mode.value;
+    const roundsChoice = form.elements.rounds.value;
+    const customRounds = normaliseRounds(dom.customRoundsInput.value) || ROUNDS.defaultCustom;
+
+    let rounds = null;
+    if (MODES[mode] && MODES[mode].rounds) {
+      rounds = roundsChoice === "custom" ? customRounds : normaliseRounds(roundsChoice);
+    }
+
     return {
-      mode: form.elements.mode.value,
+      mode,
       difficulty: form.elements.difficulty.value,
-      region: form.elements.region.value
+      region: form.elements.region.value,
+      rounds,
+      roundsChoice,
+      customRounds
     };
   }
 
   function restoreSetup() {
-    const { lastMode, lastDifficulty, lastRegion } = state.settings;
+    const { lastMode, lastDifficulty, lastRegion, lastRounds, lastCustomRounds } = state.settings;
     const form = dom.setupForm;
     const modeInput = form.querySelector(`input[name="mode"][value="${lastMode}"]`);
     const difficultyInput = form.querySelector(`input[name="difficulty"][value="${lastDifficulty}"]`);
+    const roundsInput = form.querySelector(`input[name="rounds"][value="${lastRounds}"]`);
     if (modeInput) modeInput.checked = true;
     if (difficultyInput) difficultyInput.checked = true;
+    if (roundsInput) roundsInput.checked = true;
+    dom.customRoundsInput.value = String(normaliseRounds(lastCustomRounds) || ROUNDS.defaultCustom);
     if (REGIONS.some((region) => region.id === lastRegion)) dom.regionSelect.value = lastRegion;
+    syncRoundsPanel();
+  }
+
+  /** Shows the round-length picker only for modes that use it. */
+  function syncRoundsPanel() {
+    const setup = readSetup();
+    const supportsRounds = Boolean(MODES[setup.mode] && MODES[setup.mode].rounds);
+    dom.roundsPanel.hidden = !supportsRounds;
+    dom.customRoundsWrap.hidden = !supportsRounds || setup.roundsChoice !== "custom";
   }
 
   function updatePoolHint() {
+    syncRoundsPanel();
     const setup = readSetup();
     const size = buildPool(COUNTRIES, setup.difficulty, setup.region).length;
     const tooSmall = size < 4;
-    dom.poolHint.textContent = tooSmall
-      ? "Not enough flags in this set. Widen the region or difficulty."
-      : `${size} flags in this set`;
+
+    let hint = `${size} flags in this set`;
+    if (!tooSmall && setup.rounds) {
+      hint = `${roundsLabel(setup.rounds)} from ${size} flags`;
+    }
+
+    dom.poolHint.textContent = tooSmall ? "Not enough flags in this set. Widen the region or difficulty." : hint;
     dom.poolHint.classList.toggle("is-warning", tooSmall);
     dom.startButton.disabled = tooSmall;
   }
@@ -285,7 +321,8 @@
         confusableGroups: CONFUSABLE_GROUPS,
         mode: setup.mode,
         difficulty: setup.difficulty,
-        region: setup.region
+        region: setup.region,
+        rounds: setup.rounds
       });
     } catch (error) {
       toast(error.message || "Could not start the game.", "error");
@@ -298,7 +335,9 @@
     state.settings = Storage.saveSettings({
       lastMode: setup.mode,
       lastDifficulty: setup.difficulty,
-      lastRegion: setup.region
+      lastRegion: setup.region,
+      lastRounds: setup.roundsChoice || state.settings.lastRounds,
+      lastCustomRounds: setup.customRounds || state.settings.lastCustomRounds
     });
 
     renderHudChrome();
@@ -351,6 +390,7 @@
         mode: summary.mode,
         difficulty: summary.difficulty,
         region: summary.region,
+        rounds: summary.rounds,
         accuracy: summary.accuracy,
         bestStreak: summary.bestStreak,
         answered: summary.answered
@@ -424,6 +464,7 @@
     dom.feedback.className = "feedback";
     dom.nextButton.hidden = true;
     renderQuestionTimer(1);
+    if (state.engine.mode.questionClock) renderClock(state.engine.mode.questionSeconds * 1000);
     updateLifelines();
     renderHud();
   }
@@ -506,21 +547,16 @@
     renderHud();
 
     if (result.gameOver) {
+      const reason = result.reason || engine.endReason || "lives";
       dom.nextButton.hidden = true;
       clearTimeout(state.advanceTimer);
-      state.advanceTimer = setTimeout(() => endGame("lives"), GAME_OVER_DELAY_MS);
+      state.advanceTimer = setTimeout(() => endGame(reason), GAME_OVER_DELAY_MS);
       return;
     }
 
+    // Every answer moves on by itself. The Next button only skips the wait.
     dom.nextButton.hidden = false;
-    if (result.correct) {
-      scheduleAdvance(ADVANCE_AFTER_CORRECT_MS);
-    } else if (engine.mode.totalSeconds) {
-      scheduleAdvance(ADVANCE_AFTER_WRONG_TIMED_MS);
-    } else {
-      state.advancePending = false;
-      dom.nextButton.focus({ preventScroll: true });
-    }
+    scheduleAdvance(result.correct ? ADVANCE_AFTER_CORRECT_MS : ADVANCE_AFTER_WRONG_MS);
   }
 
   function scheduleAdvance(delay) {
@@ -540,13 +576,13 @@
   /* Rendering ------------------------------------------------------------- */
 
   function renderHudChrome() {
-    const { mode, difficulty, region } = state.engine;
-    dom.hud.mode.textContent = mode.label;
+    const { mode, difficulty, region, rounds } = state.engine;
+    dom.hud.mode.textContent = modeLabel(mode.id, rounds);
     dom.hud.sub.textContent = `${difficulty.label} · ${regionLabel(region)}`;
     dom.hud.livesWrap.hidden = mode.lives === null;
-    dom.hud.clockWrap.hidden = !mode.totalSeconds;
-    dom.hud.progressWrap.hidden = mode.id !== "practice";
-    dom.hud.timer.hidden = !mode.questionSeconds;
+    dom.hud.clockWrap.hidden = !(mode.totalSeconds || mode.questionClock);
+    dom.hud.progressWrap.hidden = !(mode.id === "practice" || rounds);
+    dom.hud.timer.hidden = !mode.questionSeconds || Boolean(mode.questionClock);
     dom.hud.clock.classList.remove("is-low", "is-hit");
   }
 
@@ -568,9 +604,9 @@
       dom.hud.lives.setAttribute("aria-label", `${engine.lives} of ${engine.mode.lives} lives left`);
     }
 
-    if (engine.mode.id === "practice") {
+    if (engine.mode.id === "practice" || engine.rounds) {
       const number = state.question ? state.question.number : engine.answered;
-      dom.hud.progress.textContent = `${number} / ${engine.poolSize}`;
+      dom.hud.progress.textContent = `${number} / ${engine.rounds || engine.poolSize}`;
     }
 
     updateLifelines();
@@ -629,7 +665,8 @@
     if (engine.mode.questionSeconds && question && !question.answered && state.questionTiming) {
       const total = engine.mode.questionSeconds * 1000;
       const left = Math.max(0, state.questionDeadline - now);
-      renderQuestionTimer(left / total);
+      if (engine.mode.questionClock) renderClock(left);
+      else renderQuestionTimer(left / total);
 
       const secondsLeft = Math.ceil(left / 1000);
       if (left > 0 && secondsLeft <= 3 && secondsLeft !== state.lastTickSecond) {
@@ -650,7 +687,7 @@
     const mode = MODES[summary.mode];
     dom.result.reason.textContent = REASON_LABELS[summary.reason] || "Round ended";
     dom.result.score.textContent = formatNumber(summary.score);
-    dom.result.setup.textContent = setupLabel(summary.mode, summary.difficulty, summary.region);
+    dom.result.setup.textContent = setupLabel(summary.mode, summary.difficulty, summary.region, summary.rounds);
 
     if (rank && rank.isBest) {
       dom.result.badge.textContent = "New personal best!";
@@ -709,7 +746,7 @@
 
     const text =
       `I scored ${formatNumber(summary.score)} in Flag Guesser ` +
-      `(${setupLabel(summary.mode, summary.difficulty, summary.region)}) ` +
+      `(${setupLabel(summary.mode, summary.difficulty, summary.region, summary.rounds)}) ` +
       `with ${summary.accuracy}% accuracy and a best streak of ${summary.bestStreak}. Can you beat it?`;
     const url = window.location.href.split("#")[0];
 
@@ -756,12 +793,16 @@
       rankBadge.textContent = String(index + 1);
       rank.append(rankBadge);
 
+      const difficultyName = DIFFICULTIES[entry.difficulty] ? DIFFICULTIES[entry.difficulty].label : entry.difficulty;
+      const setupParts = [difficultyName, regionLabel(entry.region)];
+      if (Number.isFinite(entry.rounds) && entry.rounds) setupParts.unshift(roundsLabel(entry.rounds));
+
       const cells = [
         entry.name,
         formatNumber(entry.score),
         `${entry.accuracy}%`,
         String(entry.bestStreak),
-        `${DIFFICULTIES[entry.difficulty] ? DIFFICULTIES[entry.difficulty].label : entry.difficulty} · ${regionLabel(entry.region)}`,
+        setupParts.join(" · "),
         dateFormat.format(new Date(entry.date))
       ];
 
@@ -950,6 +991,11 @@
     });
 
     dom.setupForm.addEventListener("change", updatePoolHint);
+    dom.customRoundsInput.addEventListener("input", updatePoolHint);
+    dom.customRoundsInput.addEventListener("blur", () => {
+      dom.customRoundsInput.value = String(normaliseRounds(dom.customRoundsInput.value) || ROUNDS.defaultCustom);
+      updatePoolHint();
+    });
 
     dom.flagImg.addEventListener("load", onFlagLoaded);
     dom.flagImg.addEventListener("error", onFlagError);
