@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Flag Guesser</title>
+  <meta name="description" content="A fast, polished flag quiz. 199 flags, three game modes, streak scoring, lifelines and a local leaderboard.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0b1020">
+  <meta property="og:title" content="Flag Guesser">
+  <meta property="og:description" content="How many flags can you name? Three modes, 199 countries, streak scoring.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/favicon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://flagcdn.com" crossorigin>
+  <link rel="dns-prefetch" href="https://flagcdn.com">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <button class="brand" type="button" data-action="home" aria-label="Flag Guesser home">
+        <svg class="brand__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <path d="M18 12v42" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <path d="M22 14c8-5 14 5 22 0v22c-8 5-14-5-22 0z" fill="currentColor"/>
+        </svg>
+        <span class="brand__name">Flag Guesser</span>
+      </button>
+      <nav class="topbar__nav" aria-label="Primary">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="leaderboard">Leaderboard</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-action="help">How to play</button>
+        <button type="button" class="btn btn--icon" data-action="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+
+    <!-- Home / setup -->
+    <section class="screen" data-screen="home">
+      <div class="hero">
+        <p class="eyebrow">199 flags. Three modes. One leaderboard.</p>
+        <h1 class="hero__title" tabindex="-1">How many flags can you name?</h1>
+        <p class="hero__lead">Pick a mode, choose your difficulty and beat your best score.</p>
+      </div>
+
+      <form id="setup-form" class="setup" novalidate>
+        <fieldset class="setup__group">
+          <legend class="setup__label">Game mode</legend>
+          <div class="mode-grid">
+            <label class="mode-card">
+              <input type="radio" name="mode" value="classic" checked>
+              <span class="mode-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 21s-7.5-4.6-9.5-9.3C1.2 8.5 3.3 5 6.8 5c2 0 3.5 1.1 4.2 2.3C11.7 6.1 13.2 5 15.2 5c3.5 0 5.6 3.5 4.3 6.7C17.5 16.4 12 21 12 21Z" fill="currentColor"/></svg>
+              </span>
+              <span class="mode-card__name">Classic</span>
+              <span class="mode-card__desc">Three lives and twelve seconds per flag. Build streaks for big scores.</span>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="mode" value="timed">
+              <span class="mode-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2M9 2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="mode-card__name">Time Attack</span>
+              <span class="mode-card__desc">Sixty seconds on the clock. Every mistake costs three seconds.</span>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="mode" value="practice">
+              <span class="mode-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z M4 5.5v15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 7h8M8 10.5h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="mode-card__name">Practice</span>
+              <span class="mode-card__desc">No lives and no clock. Learn every flag at your own pace.</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="setup__row">
+          <fieldset class="setup__group">
+            <legend class="setup__label">Difficulty</legend>
+            <div class="segmented">
+              <label><input type="radio" name="difficulty" value="easy"><span>Easy</span></label>
+              <label><input type="radio" name="difficulty" value="medium" checked><span>Medium</span></label>
+              <label><input type="radio" name="difficulty" value="hard"><span>Hard</span></label>
+              <label><input type="radio" name="difficulty" value="expert"><span>Expert</span></label>
+            </div>
+          </fieldset>
+
+          <div class="setup__group">
+            <label class="setup__label" for="region-select">Region</label>
+            <select id="region-select" name="region" class="select"></select>
+          </div>
+        </div>
+
+        <div class="setup__footer">
+          <p class="setup__hint" id="pool-hint" aria-live="polite"></p>
+          <button type="submit" class="btn btn--primary btn--lg" id="start-button">Start game</button>
+        </div>
+        <p class="setup__tip">Tip: press <kbd>1</kbd> to <kbd>4</kbd> to answer, <kbd>H</kbd> for a capital hint and <kbd>F</kbd> for 50/50.</p>
+      </form>
+
+      <section class="stats-strip" aria-label="Your stats">
+        <div class="stat"><span class="stat__value" data-stat="games">0</span><span class="stat__label">Games played</span></div>
+        <div class="stat"><span class="stat__value" data-stat="bestClassic">0</span><span class="stat__label">Best Classic</span></div>
+        <div class="stat"><span class="stat__value" data-stat="bestTimed">0</span><span class="stat__label">Best Time Attack</span></div>
+        <div class="stat"><span class="stat__value" data-stat="accuracy">0%</span><span class="stat__label">Lifetime accuracy</span></div>
+      </section>
+    </section>
+
+    <!-- Game -->
+    <section class="screen" data-screen="game" hidden>
+      <div class="hud">
+        <div class="hud__meta">
+          <span class="hud__mode" data-hud="mode">Classic</span>
+          <span class="hud__sub" data-hud="sub"></span>
+        </div>
+        <div class="hud__stats">
+          <div class="hud__stat">
+            <span class="hud__label">Score</span>
+            <span class="hud__value" data-hud="score">0</span>
+          </div>
+          <div class="hud__stat">
+            <span class="hud__label">Streak</span>
+            <span class="hud__value" data-hud="streak">0</span>
+          </div>
+          <div class="hud__stat" data-hud="lives-wrap">
+            <span class="hud__label">Lives</span>
+            <span class="hud__value lives" data-hud="lives" role="img" aria-label="3 lives left"></span>
+          </div>
+          <div class="hud__stat" data-hud="clock-wrap" hidden>
+            <span class="hud__label">Time</span>
+            <span class="hud__value clock" data-hud="clock">60</span>
+          </div>
+          <div class="hud__stat" data-hud="progress-wrap" hidden>
+            <span class="hud__label">Flag</span>
+            <span class="hud__value" data-hud="progress">1 / 199</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn--icon" data-action="pause" aria-label="Pause game">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>
+        </button>
+      </div>
+
+      <div class="timer" data-hud="timer" role="progressbar" aria-label="Time left for this flag" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+        <div class="timer__fill" data-hud="timer-fill"></div>
+      </div>
+
+      <div class="quiz">
+        <h2 class="quiz__prompt" tabindex="-1">Which country does this flag belong to?</h2>
+
+        <figure class="flag-card" data-flag="card">
+          <img class="flag-card__img" data-flag="img" alt="Flag to identify" decoding="async" width="600" height="400">
+          <div class="flag-card__fallback" data-flag="fallback" hidden>
+            <p>The flag image could not be loaded.</p>
+            <div class="flag-card__fallback-actions">
+              <button type="button" class="btn btn--sm" data-action="retry-flag">Retry</button>
+              <button type="button" class="btn btn--sm btn--ghost" data-action="skip-flag">Skip this flag</button>
+            </div>
+          </div>
+          <figcaption class="flag-card__hint" data-flag="hint" hidden></figcaption>
+        </figure>
+
+        <div class="options" data-options>
+          <button type="button" class="option" data-index="0"><kbd>1</kbd><span class="option__text"></span></button>
+          <button type="button" class="option" data-index="1"><kbd>2</kbd><span class="option__text"></span></button>
+          <button type="button" class="option" data-index="2"><kbd>3</kbd><span class="option__text"></span></button>
+          <button type="button" class="option" data-index="3"><kbd>4</kbd><span class="option__text"></span></button>
+        </div>
+
+        <div class="lifelines">
+          <button type="button" class="btn btn--ghost btn--sm" data-action="hint"><kbd>H</kbd> Show capital</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-action="fifty"><kbd>F</kbd> 50/50 <span class="pill" data-hud="fifty-left">3</span></button>
+        </div>
+
+        <div class="feedback" data-feedback role="status" aria-live="polite"></div>
+
+        <button type="button" class="btn btn--primary btn--lg" data-action="next" hidden>Next flag <kbd>Enter</kbd></button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="screen" data-screen="results" hidden>
+      <div class="results">
+        <p class="eyebrow" data-result="reason">Game over</p>
+        <h2 class="results__title" tabindex="-1">Your score</h2>
+        <p class="results__score" data-result="score">0</p>
+        <p class="results__setup" data-result="setup"></p>
+        <p class="results__badge" data-result="badge" hidden></p>
+
+        <div class="stats-grid">
+          <div class="stat"><span class="stat__value" data-result="answered">0</span><span class="stat__label">Answered</span></div>
+          <div class="stat"><span class="stat__value" data-result="correct">0</span><span class="stat__label">Correct</span></div>
+          <div class="stat"><span class="stat__value" data-result="accuracy">0%</span><span class="stat__label">Accuracy</span></div>
+          <div class="stat"><span class="stat__value" data-result="streak">0</span><span class="stat__label">Best streak</span></div>
+          <div class="stat"><span class="stat__value" data-result="time">0s</span><span class="stat__label">Time played</span></div>
+        </div>
+
+        <div class="results__actions">
+          <button type="button" class="btn btn--primary btn--lg" data-action="play-again">Play again</button>
+          <button type="button" class="btn btn--ghost" data-action="home">Change mode</button>
+          <button type="button" class="btn btn--ghost" data-action="leaderboard">Leaderboard</button>
+          <button type="button" class="btn btn--ghost" data-action="share">Share score</button>
+        </div>
+
+        <section class="missed" aria-labelledby="missed-title">
+          <h3 id="missed-title" class="missed__title">Flags to review</h3>
+          <ul class="missed__list" data-result="missed"></ul>
+          <p class="missed__empty" data-result="missed-empty" hidden>Perfect round. You missed nothing.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="screen" data-screen="leaderboard" hidden>
+      <div class="board__head">
+        <h2 class="board__title" tabindex="-1">Leaderboard</h2>
+        <p class="board__note">Top ten scores per mode, saved on this device.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Game mode">
+        <button type="button" role="tab" id="tab-classic" aria-selected="true" aria-controls="board-panel" data-board="classic">Classic</button>
+        <button type="button" role="tab" id="tab-timed" aria-selected="false" aria-controls="board-panel" data-board="timed">Time Attack</button>
+      </div>
+
+      <div id="board-panel" role="tabpanel" aria-labelledby="tab-classic">
+        <div class="table-wrap">
+          <table class="board">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Player</th>
+                <th scope="col">Score</th>
+                <th scope="col">Accuracy</th>
+                <th scope="col">Streak</th>
+                <th scope="col">Setup</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody data-board-body></tbody>
+          </table>
+        </div>
+        <p class="board__empty" data-board-empty hidden>No scores yet. Play a round to claim the top spot.</p>
+      </div>
+
+      <div class="board__actions">
+        <button type="button" class="btn btn--primary" data-action="home">Play</button>
+        <button type="button" class="btn btn--ghost btn--danger" data-action="clear-scores">Clear scores</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <p>Built by Fahad Yousuf. Flag images by <a href="https://flagpedia.net" target="_blank" rel="noopener">Flagpedia</a>.</p>
+  </footer>
+
+  <!-- Pause -->
+  <dialog id="pause-dialog" class="dialog" aria-labelledby="pause-title">
+    <h2 id="pause-title" class="dialog__title">Paused</h2>
+    <p class="dialog__text">Take a breath. The clock is stopped.</p>
+    <div class="dialog__actions dialog__actions--stack">
+      <button type="button" class="btn btn--primary" data-action="resume">Resume <kbd>Esc</kbd></button>
+      <button type="button" class="btn btn--ghost" data-action="restart">Restart round</button>
+      <button type="button" class="btn btn--ghost" data-action="end-game">End round and see results</button>
+      <button type="button" class="btn btn--ghost" data-action="quit">Back to menu</button>
+    </div>
+  </dialog>
+
+  <!-- Settings -->
+  <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
+    <form method="dialog" id="settings-form" class="settings">
+      <h2 id="settings-title" class="dialog__title">Settings</h2>
+
+      <label class="field">
+        <span class="field__label">Player name</span>
+        <input class="input" type="text" name="playerName" maxlength="20" autocomplete="nickname" placeholder="Player">
+        <span class="field__help">Shown on the leaderboard.</span>
+      </label>
+
+      <label class="field field--row">
+        <span class="field__label">Sound effects</span>
+        <span class="switch">
+          <input type="checkbox" name="sound" role="switch">
+          <span class="switch__track" aria-hidden="true"></span>
+        </span>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Theme</span>
+        <select class="select" name="theme">
+          <option value="system">Match system</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </label>
+
+      <div class="dialog__actions">
+        <button type="button" class="btn btn--ghost btn--danger" data-action="reset-data">Reset all data</button>
+        <span class="dialog__spacer"></span>
+        <button type="button" class="btn btn--ghost" data-action="close-dialog">Cancel</button>
+        <button type="submit" class="btn btn--primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Help -->
+  <dialog id="help-dialog" class="dialog dialog--wide" aria-labelledby="help-title">
+    <h2 id="help-title" class="dialog__title">How to play</h2>
+    <div class="help">
+      <p>A flag appears with four country names. Pick the right one. That is the whole game, but the details decide your score.</p>
+
+      <h3>Modes</h3>
+      <ul>
+        <li><strong>Classic.</strong> Three lives and twelve seconds per flag. Run out of either and the round ends.</li>
+        <li><strong>Time Attack.</strong> Sixty seconds total. Wrong answers cost three seconds.</li>
+        <li><strong>Practice.</strong> No pressure. Scores are not ranked.</li>
+      </ul>
+
+      <h3>Scoring</h3>
+      <ul>
+        <li>100 points per correct flag, plus up to 50 for answering quickly.</li>
+        <li>Each consecutive correct answer adds 10% to your multiplier, up to double points at a 10 streak.</li>
+        <li>Difficulty multiplies everything: Easy x1, Medium x1.25, Hard x1.5, Expert x2.</li>
+        <li>A capital hint halves the points for that flag. Using 50/50 keeps three quarters.</li>
+      </ul>
+
+      <h3>Keyboard</h3>
+      <ul class="help__keys">
+        <li><kbd>1</kbd> to <kbd>4</kbd> choose an answer</li>
+        <li><kbd>Enter</kbd> next flag</li>
+        <li><kbd>H</kbd> capital hint</li>
+        <li><kbd>F</kbd> 50/50</li>
+        <li><kbd>Esc</kbd> pause</li>
+      </ul>
+    </div>
+    <div class="dialog__actions">
+      <button type="button" class="btn btn--primary" data-action="close-dialog">Got it</button>
+    </div>
+  </dialog>
+
+  <!-- Confirm -->
+  <dialog id="confirm-dialog" class="dialog" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title" class="dialog__title" data-confirm="title">Are you sure?</h2>
+      <p class="dialog__text" data-confirm="message"></p>
+      <div class="dialog__actions">
+        <button type="submit" class="btn btn--ghost" value="cancel">Cancel</button>
+        <button type="submit" class="btn btn--danger-solid" value="ok" data-confirm="ok">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+
+  <script src="js/countries.js" defer></script>
+  <script src="js/storage.js" defer></script>
+  <script src="js/audio.js" defer></script>
+  <script src="js/engine.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "flag-guesser",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A fast flag quiz with three modes, streak scoring and a local leaderboard.",
+  "scripts": {
+    "start": "npx --yes serve . -l 4173",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
